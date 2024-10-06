@@ -3,3 +3,4 @@ backend/node_modules
 admin/node_modules
 backend/.env
 admin/.env
+frontend/.env

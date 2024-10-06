@@ -4,6 +4,7 @@ import 'dotenv/config'
 import connectDb from './config/mongodb.js'
 import connectCloudinary from './config/cloudinary.js'
 import adminRouter from './routes/adminRoute.js'
+import doctorRouter from './routes/doctorRoute.js'
 
 
 // app config 
@@ -24,6 +25,7 @@ app.get('/', (req, res) => {
 })
 
 app.use('/api/admin', adminRouter)
+app.use('/api/doctor', doctorRouter)
 
 
 app.listen(port, () => {
