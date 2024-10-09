@@ -5,8 +5,11 @@ import jwt from 'jsonwebtoken'
 import { v2 as cloudinary } from 'cloudinary'
 import doctorModel from '../models/doctorModel.js'
 import appointmentModel from '../models/appointmentModel.js'
+import razorpay  from 'razorpay'
+import { FedaPay, Transaction } from 'fedapay'
 
 // API to register user
+
 
 const registerUser = async (req, res) => {
     try {
@@ -215,4 +218,48 @@ const getProfile  = async (req, res) => {
     }
  }
 
-export { registerUser, loginUser, getProfile, updateUserProfile, bookAppointment, listAppointments, cancelAppointment }
+ FedaPay.setApiKey(process.env.FEDAPAY_KEY_ID);
+ FedaPay.setEnvironment('sandbox');
+
+ // API to make payment of appointment using razorpay
+
+ const paymentFedapay = async (req, res) => {
+    try {
+        const { appointmentId } = req.body;
+        const appointmentData = await appointmentModel.findById(appointmentId);
+
+        if (!appointmentData || appointmentData.cancelled) {
+            return res.status(400).json({ success: false, message: "Appointment not found or cancelled" });
+        }
+
+        // Créer la transaction Fedapay
+        const transaction = await Transaction.create({
+            description: `Payment for appointment ${appointmentId}`,
+            amount: appointmentData.amount, // Assurez-vous que le montant est un entier (en centimes)
+            currency: {
+                iso: 'XOF' // Adapter la devise à la réalité de votre projet
+            },
+            callback_url: 'https://maplateforme.com/callback', // Mettre l'URL de retour correcte
+            customer: {
+                name: appointmentData.name,
+                email: appointmentData.email,
+                phone_number: {
+                    number: appointmentData.phone, 
+                    country: 'BJ' // Modifier selon le pays du client
+                }
+            }
+        });
+
+        // Générer le token et récupérer le lien de paiement
+        const token = await transaction.generateToken();
+
+        // Envoyer la réponse avec le lien de redirection vers la page de paiement
+        res.status(200).json({ success: true, paymentUrl: token.url });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+
+export { registerUser, loginUser, getProfile, updateUserProfile, bookAppointment, listAppointments, cancelAppointment, paymentFedapay }

@@ -15,8 +15,13 @@ export const authUser = async (req, res, next) => {
         next()
         
     } catch (error) { 
-        console.log(error)
-        res.json({ success: false, message: error.message })
+        
+        if(error.name === "TokenExpiredError") {
+            return res.status(401).json({ success: false, message: "Your session has expired, please login again" })
+        } else {
+            console.log(error)
+            return res.status(500).json({ success: false, message: "Something went wrong" })
+        }
     }
 }
 
