@@ -29,12 +29,43 @@ const DoctorContextProvider = (props) => {
         }
     } 
 
+    const cancelAppointment = async (appointmentId) => {
+        try {
+            const { data } = await axios.post(`${backendUrl}/api/doctor/cancel-appointment`, { appointmentId }, { headers: { dToken } })
+            if (data.success) {
+                toast.success(data.message)
+                getAppointments()
+            } else {
+                toast.error(data.message)
+            }
+        } catch (error) {
+            console.log(error)
+            toast.error(error.response.data.message )
+        }
+    }
+
+    const completeAppointment = async (appointmentId) => {
+        try {
+            const { data } = await axios.post(`${backendUrl}/api/doctor/complete-appointment`, { appointmentId }, { headers: { dToken } })
+            if (data.success) {
+                toast.success(data.message)
+                getAppointments()
+            } else {
+                toast.error(data.message)
+            }
+        } catch (error) {
+            console.log(error)
+            toast.error(error.response.data.message )
+        }
+    }
+
 
     const value = {
         dToken, setDToken,
         backendUrl,
         appointments, setAppointments,
-        getAppointments 
+        getAppointments,
+        cancelAppointment, completeAppointment
     }
 
 
