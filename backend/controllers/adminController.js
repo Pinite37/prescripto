@@ -121,8 +121,14 @@ const appointmentsAdmin = async (req, res) => {
 
 const removeDoctor = async (req, res) => {
     try {
-        const { id } = req.body
-        await doctorModel.findByIdAndDelete(id)
+        const { docId } = req.body
+        const deletedDoctor = await doctorModel.findByIdAndDelete(docId)
+        if(!deletedDoctor) {
+            return res.status(400).json({ success: false, message: "Doctor not found" })
+        }
+
+        await appointmentModel.deleteMany({ docId })
+        
         res.status(200).json({ success: true, message: "Doctor removed successfully" })
     } catch (error) {
         console.log(error)
