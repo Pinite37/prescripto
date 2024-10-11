@@ -113,6 +113,23 @@ const getProfile  = async (req, res) => {
             await userModel.findByIdAndUpdate(userId, { image: imageUrl }) 
         }
 
+        const user = await userModel.findById(userId)
+        const appointments = await appointmentModel.find({ userId })
+
+        await Promise.all(appointments.map(async (appointment) => {
+            appointment.userData = {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                image: user.image || appointment.userData.image,
+                address: user.address,
+                gender: user.gender,
+                dob: user.dob,
+                phone: user.phone
+            }
+            await appointment.save()
+        }))
+
         res.status(200).json({ success: true, message: "Profile updated successfully" }) 
 
          

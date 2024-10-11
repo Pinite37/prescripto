@@ -8,6 +8,9 @@ const AppContextProvider = (props) => {
 
     const currencySymbol = 'XOF'
     const calculateAge = (dob) => {
+        if(dob === "Not Selected") {
+            return "Not Selected"
+        }
         const today = new Date();
         const birthDate = new Date(dob);
         let age = today.getFullYear() - birthDate.getFullYear();
